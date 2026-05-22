@@ -8,9 +8,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = md5($_POST['password']);
     $role     = $_POST['role'];
 
-    $sql = "SELECT * FROM users 
-            WHERE email='$email' 
-            AND password='$password' 
+    $sql = "SELECT * FROM users
+            WHERE email='$email'
+            AND password='$password'
             AND role='$role'";
 
     $result = mysqli_query($conn, $sql);
@@ -18,26 +18,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (mysqli_num_rows($result) > 0) {
         $user = mysqli_fetch_assoc($result);
 
-        // Blocked check
         if ($user['status'] === 'blocked') {
             echo "<script>alert('Your account is blocked! Contact admin.');
                   window.location='login.php';</script>";
             exit();
         }
 
-        // Pending check
         if ($user['status'] === 'pending') {
             echo "<script>alert('Your account is pending admin approval!');
                   window.location='login.php';</script>";
             exit();
         }
 
-        // Session set karo
-        $_SESSION['user_id']   = $user['id'];
-        $_SESSION['user_name'] = $user['fullname'];
-        $_SESSION['user_role'] = $user['role'];
+        // Session set karo — sab users ke liye email save karo
+        $_SESSION['user_id']    = $user['id'];
+        $_SESSION['user_name']  = $user['fullname'];
+        $_SESSION['user_role']  = $user['role'];
+        $_SESSION['user_email'] = $user['email'];
 
-        // Role ke hisaab se dashboard pe bhejo
         if ($role === 'admin') {
             header("Location: admin/dashboard.php");
         } elseif ($role === 'doctor') {
