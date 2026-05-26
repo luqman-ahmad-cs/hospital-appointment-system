@@ -121,11 +121,21 @@ $appointments = mysqli_query($conn,
         <small style="opacity:0.7">Patient Portal</small>
     </div>
     <div class="sidebar-menu">
-        <a href="dashboard.php"><i class="fas fa-home"></i> Dashboard</a>
-        <a href="book_appointment.php"><i class="fas fa-calendar-plus"></i> Book Appointment</a>
-        <a href="my_appointments.php" class="active"><i class="fas fa-calendar-check"></i> My Appointments</a>
-        <a href="video_call.php"><i class="fas fa-video"></i> Video Call</a>
-        <a href="profile.php"><i class="fas fa-user"></i> My Profile</a>
+        <a href="dashboard.php">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="book_appointment.php">
+            <i class="fas fa-calendar-plus"></i> Book Appointment
+        </a>
+        <a href="my_appointments.php" class="active">
+            <i class="fas fa-calendar-check"></i> My Appointments
+        </a>
+        <a href="video_call.php">
+            <i class="fas fa-video"></i> Video Call
+        </a>
+        <a href="profile.php">
+            <i class="fas fa-user"></i> My Profile
+        </a>
     </div>
     <div class="sidebar-logout">
         <a href="../logout.php">
@@ -140,7 +150,10 @@ $appointments = mysqli_query($conn,
 <div class="main-content">
 
     <div class="topbar">
-        <h5><i class="fas fa-calendar-check"></i> My Appointments</h5>
+        <h5>
+            <i class="fas fa-calendar-check"></i>
+            My Appointments
+        </h5>
         <div class="user-badge">
             <i class="fas fa-user"></i>
             <?php echo $_SESSION['user_name']; ?>
@@ -148,7 +161,8 @@ $appointments = mysqli_query($conn,
     </div>
 
     <div class="table-card">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between
+                    align-items-center mb-4">
             <h5 class="mb-0">
                 <i class="fas fa-list text-primary"></i>
                 All Appointments
@@ -200,6 +214,11 @@ $appointments = mysqli_query($conn,
                         "SELECT id FROM ratings
                          WHERE appointment_id='{$row['id']}'
                          AND patient_id='$patient_id'"));
+
+                    // Prescription check
+                    $pres = mysqli_fetch_assoc(mysqli_query($conn,
+                        "SELECT id FROM prescriptions
+                         WHERE appointment_id='{$row['id']}'"));
                 ?>
                     <tr>
                         <td><?php echo $i++; ?></td>
@@ -218,7 +237,7 @@ $appointments = mysqli_query($conn,
                                 strtotime($row['appointment_time'])); ?>
                         </td>
                         <td>
-                            <?php if($row['type'] == 'video-call'): ?>
+                            <?php if($row['type']=='video-call'): ?>
                                 <span class="badge-video">
                                     Video Call
                                 </span>
@@ -229,15 +248,15 @@ $appointments = mysqli_query($conn,
                             <?php endif; ?>
                         </td>
                         <td>
-                            <?php if($row['status'] == 'pending'): ?>
+                            <?php if($row['status']=='pending'): ?>
                                 <span class="badge-pending">
                                     Pending
                                 </span>
-                            <?php elseif($row['status'] == 'confirmed'): ?>
+                            <?php elseif($row['status']=='confirmed'): ?>
                                 <span class="badge-confirmed">
                                     Confirmed
                                 </span>
-                            <?php elseif($row['status'] == 'completed'): ?>
+                            <?php elseif($row['status']=='completed'): ?>
                                 <span class="badge-completed">
                                     Completed
                                 </span>
@@ -248,38 +267,35 @@ $appointments = mysqli_query($conn,
                             <?php endif; ?>
                         </td>
 
-                        <!-- Payment Column -->
+                        <!-- Payment -->
                         <td>
                             <?php if($paid_check): ?>
-                                <span style="background:#d1e7dd;
-                                             color:#0f5132;padding:6px 12px;
-                                             border-radius:8px;font-size:12px;
-                                             font-weight:600;">
+                                <span class="action-btn"
+                                      style="background:#d1e7dd;
+                                             color:#0f5132;">
                                     ✅ Paid
                                 </span>
-                            <?php elseif($row['status'] == 'confirmed'): ?>
+                            <?php elseif($row['status']=='confirmed'): ?>
                                 <a href="payment.php?id=<?php echo $row['id']; ?>"
                                    class="action-btn"
                                    style="background:#28a745;color:white;">
                                     💳 Pay Now
                                 </a>
-                            <?php elseif($row['status'] == 'pending'): ?>
-                                <span style="background:#fff3cd;
-                                             color:#856404;padding:6px 12px;
-                                             border-radius:8px;font-size:12px;
-                                             font-weight:600;">
+                            <?php elseif($row['status']=='pending'): ?>
+                                <span class="action-btn"
+                                      style="background:#fff3cd;
+                                             color:#856404;">
                                     ⏳ Pending
                                 </span>
                             <?php else: ?>
-                                <span style="color:#aaa;font-size:12px;">
-                                    —
-                                </span>
+                                <span style="color:#aaa;
+                                             font-size:12px;">—</span>
                             <?php endif; ?>
                         </td>
 
-                        <!-- Actions Column -->
+                        <!-- Actions -->
                         <td>
-                            <?php if($row['status'] == 'pending'): ?>
+                            <?php if($row['status']=='pending'): ?>
                                 <a href="cancel_appointment.php?id=<?php echo $row['id']; ?>"
                                    onclick="return confirm('Cancel this appointment?')"
                                    class="action-btn"
@@ -287,20 +303,28 @@ $appointments = mysqli_query($conn,
                                     ❌ Cancel
                                 </a>
 
-                            <?php elseif($row['status'] == 'completed'): ?>
+                            <?php elseif($row['status']=='completed'): ?>
+
                                 <?php if(!$rated): ?>
-                                    <a href="rate_doctor.php?id=<?php echo $row['id']; ?>"
-                                       class="action-btn"
-                                       style="background:#ffc107;color:#333;">
-                                        ⭐ Rate Doctor
-                                    </a>
+                                <a href="rate_doctor.php?id=<?php echo $row['id']; ?>"
+                                   class="action-btn"
+                                   style="background:#ffc107;color:#333;">
+                                    ⭐ Rate
+                                </a>
                                 <?php else: ?>
-                                    <span style="background:#fff3cd;
-                                                 color:#856404;padding:6px 12px;
-                                                 border-radius:8px;font-size:12px;
-                                                 font-weight:600;">
-                                        ⭐ Rated
-                                    </span>
+                                <span class="action-btn"
+                                      style="background:#fff3cd;
+                                             color:#856404;">
+                                    ⭐ Rated
+                                </span>
+                                <?php endif; ?>
+
+                                <?php if($pres): ?>
+                                <a href="view_prescription.php?id=<?php echo $pres['id']; ?>"
+                                   class="action-btn"
+                                   style="background:#6f42c1;color:white;">
+                                    💊 Prescription
+                                </a>
                                 <?php endif; ?>
 
                             <?php else: ?>

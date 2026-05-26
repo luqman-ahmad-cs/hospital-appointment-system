@@ -14,7 +14,7 @@ $appointments = mysqli_query($conn,
      FROM appointments a
      JOIN users u ON a.patient_id = u.id
      WHERE a.doctor_id = '$doctor_id'
-     ORDER BY a.appointment_date DESC, 
+     ORDER BY a.appointment_date DESC,
               a.appointment_time DESC");
 ?>
 
@@ -103,7 +103,6 @@ $appointments = mysqli_query($conn,
             padding: 25px;
             box-shadow: 0 2px 15px rgba(0,0,0,0.06);
         }
-        .table-card h5 { font-weight: 700; margin-bottom: 20px; }
         .table th { background: #f8f9fa; font-weight: 600; }
         .table td, .table th { vertical-align: middle; }
         .badge-pending { background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; }
@@ -112,20 +111,11 @@ $appointments = mysqli_query($conn,
         .badge-cancelled { background: #f8d7da; color: #842029; padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; }
         .badge-video { background: #e2d9f3; color: #6f42c1; padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; }
         .badge-inperson { background: #d1e7dd; color: #0f5132; padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; }
-        .btn-confirm {
-            background: #28a745; color: white;
+        .action-btn {
             border: none; border-radius: 8px;
             padding: 6px 12px; font-size: 12px;
             font-weight: 600; cursor: pointer;
-            text-decoration: none; margin: 1px;
-            display: inline-block;
-        }
-        .btn-complete {
-            background: #0d6efd; color: white;
-            border: none; border-radius: 8px;
-            padding: 6px 12px; font-size: 12px;
-            font-weight: 600; cursor: pointer;
-            text-decoration: none; margin: 1px;
+            text-decoration: none; margin: 2px;
             display: inline-block;
         }
     </style>
@@ -140,12 +130,18 @@ $appointments = mysqli_query($conn,
         <small style="opacity:0.6">Doctor Portal</small>
     </div>
     <div class="sidebar-menu">
-        <a href="dashboard.php"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="dashboard.php">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
         <a href="my_appointments.php" class="active">
             <i class="fas fa-calendar-check"></i> My Appointments
         </a>
-        <a href="video_call.php"><i class="fas fa-video"></i> Video Call</a>
-        <a href="profile.php"><i class="fas fa-user"></i> My Profile</a>
+        <a href="video_call.php">
+            <i class="fas fa-video"></i> Video Call
+        </a>
+        <a href="profile.php">
+            <i class="fas fa-user"></i> My Profile
+        </a>
     </div>
     <div class="sidebar-logout">
         <a href="../logout.php">
@@ -172,32 +168,33 @@ $appointments = mysqli_query($conn,
     <div class="filter-tabs">
         <a href="my_appointments.php?filter=all"
            class="filter-btn <?php echo $filter=='all'?'active':''; ?>">
-            📋 All
+            All
         </a>
         <a href="my_appointments.php?filter=pending"
            class="filter-btn <?php echo $filter=='pending'?'active':''; ?>">
-            ⏳ Pending
+            Pending
         </a>
         <a href="my_appointments.php?filter=confirmed"
            class="filter-btn <?php echo $filter=='confirmed'?'active':''; ?>">
-            ✅ Confirmed
+            Confirmed
         </a>
         <a href="my_appointments.php?filter=completed"
            class="filter-btn <?php echo $filter=='completed'?'active':''; ?>">
-            🏁 Completed
+            Completed
         </a>
         <a href="my_appointments.php?filter=cancelled"
            class="filter-btn <?php echo $filter=='cancelled'?'active':''; ?>">
-            ❌ Cancelled
+            Cancelled
         </a>
     </div>
 
-    <!-- Table -->
     <div class="table-card">
-        <h5><i class="fas fa-list text-success"></i> Appointments List</h5>
+        <h5 class="fw-bold mb-4">
+            <i class="fas fa-list text-success"></i>
+            Appointments List
+        </h5>
 
         <?php
-        // Filter ke hisaab se query
         if ($filter != 'all') {
             $appointments = mysqli_query($conn,
                 "SELECT a.*, u.fullname as patient_name, u.phone
@@ -211,7 +208,8 @@ $appointments = mysqli_query($conn,
 
         <?php if (mysqli_num_rows($appointments) == 0): ?>
             <div class="text-center text-muted py-5">
-                <i class="fas fa-calendar-times fa-4x mb-3" style="color:#ccc"></i>
+                <i class="fas fa-calendar-times fa-4x mb-3"
+                   style="color:#ccc"></i>
                 <p>No appointments found!</p>
             </div>
         <?php else: ?>
@@ -227,45 +225,111 @@ $appointments = mysqli_query($conn,
                         <th>Type</th>
                         <th>Notes</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                <?php $i = 1; while ($row = mysqli_fetch_assoc($appointments)): ?>
+                <?php $i = 1;
+                while ($row = mysqli_fetch_assoc($appointments)):
+
+                    // Prescription check
+                    $pres = mysqli_fetch_assoc(mysqli_query($conn,
+                        "SELECT id FROM prescriptions
+                         WHERE appointment_id='{$row['id']}'"));
+                ?>
                     <tr>
                         <td><?php echo $i++; ?></td>
-                        <td><strong><?php echo $row['patient_name']; ?></strong></td>
+                        <td>
+                            <strong>
+                                <?php echo $row['patient_name']; ?>
+                            </strong>
+                        </td>
                         <td><?php echo $row['phone']; ?></td>
-                        <td><?php echo date('d M Y', strtotime($row['appointment_date'])); ?></td>
-                        <td><?php echo date('h:i A', strtotime($row['appointment_time'])); ?></td>
+                        <td>
+                            <?php echo date('d M Y',
+                                strtotime($row['appointment_date'])); ?>
+                        </td>
+                        <td>
+                            <?php echo date('h:i A',
+                                strtotime($row['appointment_time'])); ?>
+                        </td>
                         <td>
                             <?php if($row['type'] == 'video-call'): ?>
-                                <span class="badge-video">🎥 Video</span>
+                                <span class="badge-video">
+                                    🎥 Video
+                                </span>
                             <?php else: ?>
-                                <span class="badge-inperson">🏥 In-Person</span>
+                                <span class="badge-inperson">
+                                    🏥 In-Person
+                                </span>
                             <?php endif; ?>
                         </td>
                         <td>
-                            <?php echo $row['notes'] ? $row['notes'] : '—'; ?>
+                            <?php echo $row['notes']
+                                ? $row['notes'] : '—'; ?>
                         </td>
                         <td>
-                            <?php if($row['status'] == 'pending'): ?>
-                                <span class="badge-pending">⏳ Pending</span>
-                            <?php elseif($row['status'] == 'confirmed'): ?>
-                                <span class="badge-confirmed">✅ Confirmed</span>
-                            <?php elseif($row['status'] == 'completed'): ?>
-                                <span class="badge-completed">🏁 Completed</span>
+                            <?php if($row['status']=='pending'): ?>
+                                <span class="badge-pending">
+                                    ⏳ Pending
+                                </span>
+                            <?php elseif($row['status']=='confirmed'): ?>
+                                <span class="badge-confirmed">
+                                    ✅ Confirmed
+                                </span>
+                            <?php elseif($row['status']=='completed'): ?>
+                                <span class="badge-completed">
+                                    🏁 Completed
+                                </span>
                             <?php else: ?>
-                                <span class="badge-cancelled">❌ Cancelled</span>
+                                <span class="badge-cancelled">
+                                    ❌ Cancelled
+                                </span>
                             <?php endif; ?>
                         </td>
                         <td>
                             <?php if($row['status'] == 'pending'): ?>
                                 <a href="confirm_appointment.php?id=<?php echo $row['id']; ?>"
-                                   class="btn-confirm">✅ Confirm</a>
+                                   class="action-btn"
+                                   style="background:#28a745;color:white;">
+                                    ✅ Confirm
+                                </a>
+
                             <?php elseif($row['status'] == 'confirmed'): ?>
                                 <a href="complete_appointment.php?id=<?php echo $row['id']; ?>"
-                                   class="btn-complete">🏁 Complete</a>
+                                   class="action-btn"
+                                   style="background:#0d6efd;color:white;">
+                                    🏁 Complete
+                                </a>
+                                <?php if(!$pres): ?>
+                                <a href="write_prescription.php?id=<?php echo $row['id']; ?>"
+                                   class="action-btn"
+                                   style="background:#6f42c1;color:white;">
+                                    💊 Prescribe
+                                </a>
+                                <?php else: ?>
+                                <a href="view_prescription.php?id=<?php echo $pres['id']; ?>"
+                                   class="action-btn"
+                                   style="background:#20c997;color:white;">
+                                    📋 View Rx
+                                </a>
+                                <?php endif; ?>
+
+                            <?php elseif($row['status'] == 'completed'): ?>
+                                <?php if(!$pres): ?>
+                                <a href="write_prescription.php?id=<?php echo $row['id']; ?>"
+                                   class="action-btn"
+                                   style="background:#6f42c1;color:white;">
+                                    💊 Prescribe
+                                </a>
+                                <?php else: ?>
+                                <a href="view_prescription.php?id=<?php echo $pres['id']; ?>"
+                                   class="action-btn"
+                                   style="background:#20c997;color:white;">
+                                    📋 View Rx
+                                </a>
+                                <?php endif; ?>
+
                             <?php else: ?>
                                 <span class="text-muted">—</span>
                             <?php endif; ?>
