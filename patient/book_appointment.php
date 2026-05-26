@@ -310,6 +310,35 @@ $doctors = mysqli_query($conn,
                     <div class="doctor-info">
                         <p><i class="fas fa-graduation-cap"></i><?php echo $doc['qualification']; ?></p>
                         <p><i class="fas fa-clock"></i><?php echo $doc['experience']; ?> Years Experience</p>
+                        <?php
+// Doctor ki average rating fetch karo
+$avg = mysqli_fetch_assoc(mysqli_query($conn,
+    "SELECT ROUND(AVG(rating), 1) as avg_rating,
+            COUNT(*) as total
+     FROM ratings
+     WHERE doctor_id = '" . $doc['id'] . "'"));
+?>
+<p style="margin:5px 0 0;">
+    <?php if($avg['total'] > 0): ?>
+        <?php
+        $stars = $avg['avg_rating'];
+        for($s = 1; $s <= 5; $s++) {
+            if($s <= $stars) {
+                echo '<span style="color:#ffc107;">★</span>';
+            } else {
+                echo '<span style="color:#ddd;">★</span>';
+            }
+        }
+        ?>
+        <small style="color:#888;">
+            (<?php echo $avg['avg_rating']; ?>/5
+            — <?php echo $avg['total']; ?> reviews)
+        </small>
+    <?php else: ?>
+        <span style="color:#ddd;">★★★★★</span>
+        <small style="color:#888;">(No reviews yet)</small>
+    <?php endif; ?>
+</p>
                     </div>
 
                 </div>

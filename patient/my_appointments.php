@@ -87,7 +87,6 @@ $appointments = mysqli_query($conn,
             padding: 25px;
             box-shadow: 0 2px 15px rgba(0,0,0,0.06);
         }
-        .table-card h5 { font-weight: 700; margin-bottom: 20px; }
         .table th { background: #f8f9fa; font-weight: 600; }
         .table td, .table th { vertical-align: middle; }
         .badge-pending { background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; }
@@ -103,6 +102,13 @@ $appointments = mysqli_query($conn,
             text-decoration: none; font-size: 14px;
         }
         .btn-book-new:hover { opacity: 0.9; color: white; }
+        .action-btn {
+            border: none; border-radius: 8px;
+            padding: 6px 12px; font-size: 12px;
+            font-weight: 600; cursor: pointer;
+            text-decoration: none; margin: 2px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -143,7 +149,10 @@ $appointments = mysqli_query($conn,
 
     <div class="table-card">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="mb-0"><i class="fas fa-list text-primary"></i> All Appointments</h5>
+            <h5 class="mb-0">
+                <i class="fas fa-list text-primary"></i>
+                All Appointments
+            </h5>
             <a href="book_appointment.php" class="btn-book-new">
                 <i class="fas fa-plus"></i> Book New
             </a>
@@ -151,11 +160,13 @@ $appointments = mysqli_query($conn,
 
         <?php if (mysqli_num_rows($appointments) == 0): ?>
             <div class="text-center text-muted py-5">
-                <i class="fas fa-calendar-times fa-4x mb-3" style="color:#ccc"></i>
+                <i class="fas fa-calendar-times fa-4x mb-3"
+                   style="color:#ccc"></i>
                 <h5>No appointments yet!</h5>
                 <p>Book your first appointment now.</p>
                 <a href="book_appointment.php" class="btn-book-new">
-                    <i class="fas fa-calendar-plus"></i> Book Appointment
+                    <i class="fas fa-calendar-plus"></i>
+                    Book Appointment
                 </a>
             </div>
         <?php else: ?>
@@ -171,79 +182,129 @@ $appointments = mysqli_query($conn,
                         <th>Type</th>
                         <th>Status</th>
                         <th>Payment</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                <?php $i = 1; while ($row = mysqli_fetch_assoc($appointments)): ?>
-                    <?php
+                <?php $i = 1;
+                while ($row = mysqli_fetch_assoc($appointments)):
+
                     // Payment check
                     $paid_check = mysqli_fetch_assoc(mysqli_query($conn,
                         "SELECT id FROM payments
                          WHERE appointment_id='{$row['id']}'
                          AND status='completed'"));
-                    ?>
+
+                    // Rating check
+                    $rated = mysqli_fetch_assoc(mysqli_query($conn,
+                        "SELECT id FROM ratings
+                         WHERE appointment_id='{$row['id']}'
+                         AND patient_id='$patient_id'"));
+                ?>
                     <tr>
                         <td><?php echo $i++; ?></td>
-                        <td><strong>Dr. <?php echo $row['doctor_name']; ?></strong></td>
+                        <td>
+                            <strong>
+                                Dr. <?php echo $row['doctor_name']; ?>
+                            </strong>
+                        </td>
                         <td><?php echo $row['specialization']; ?></td>
-                        <td><?php echo date('d M Y', strtotime($row['appointment_date'])); ?></td>
-                        <td><?php echo date('h:i A', strtotime($row['appointment_time'])); ?></td>
+                        <td>
+                            <?php echo date('d M Y',
+                                strtotime($row['appointment_date'])); ?>
+                        </td>
+                        <td>
+                            <?php echo date('h:i A',
+                                strtotime($row['appointment_time'])); ?>
+                        </td>
                         <td>
                             <?php if($row['type'] == 'video-call'): ?>
-                                <span class="badge-video">Video Call</span>
+                                <span class="badge-video">
+                                    Video Call
+                                </span>
                             <?php else: ?>
-                                <span class="badge-inperson">In-Person</span>
+                                <span class="badge-inperson">
+                                    In-Person
+                                </span>
                             <?php endif; ?>
                         </td>
                         <td>
                             <?php if($row['status'] == 'pending'): ?>
-                                <span class="badge-pending">Pending</span>
+                                <span class="badge-pending">
+                                    Pending
+                                </span>
                             <?php elseif($row['status'] == 'confirmed'): ?>
-                                <span class="badge-confirmed">Confirmed</span>
+                                <span class="badge-confirmed">
+                                    Confirmed
+                                </span>
                             <?php elseif($row['status'] == 'completed'): ?>
-                                <span class="badge-completed">Completed</span>
+                                <span class="badge-completed">
+                                    Completed
+                                </span>
                             <?php else: ?>
-                                <span class="badge-cancelled">Cancelled</span>
+                                <span class="badge-cancelled">
+                                    Cancelled
+                                </span>
                             <?php endif; ?>
                         </td>
+
+                        <!-- Payment Column -->
                         <td>
                             <?php if($paid_check): ?>
-                                <span style="background:#d1e7dd;color:#0f5132;
-                                             padding:6px 12px;border-radius:8px;
-                                             font-size:12px;font-weight:600;">
-                                    Paid
+                                <span style="background:#d1e7dd;
+                                             color:#0f5132;padding:6px 12px;
+                                             border-radius:8px;font-size:12px;
+                                             font-weight:600;">
+                                    ✅ Paid
                                 </span>
                             <?php elseif($row['status'] == 'confirmed'): ?>
                                 <a href="payment.php?id=<?php echo $row['id']; ?>"
-                                   style="background:#28a745;color:white;border:none;
-                                          border-radius:8px;padding:6px 12px;
-                                          font-size:12px;font-weight:600;
-                                          text-decoration:none;display:inline-block;">
-                                    Pay Now
+                                   class="action-btn"
+                                   style="background:#28a745;color:white;">
+                                    💳 Pay Now
                                 </a>
                             <?php elseif($row['status'] == 'pending'): ?>
-                                <span style="background:#fff3cd;color:#856404;
-                                             padding:6px 12px;border-radius:8px;
-                                             font-size:12px;font-weight:600;">
-                                    Pending
+                                <span style="background:#fff3cd;
+                                             color:#856404;padding:6px 12px;
+                                             border-radius:8px;font-size:12px;
+                                             font-weight:600;">
+                                    ⏳ Pending
                                 </span>
                             <?php else: ?>
-                                <span style="color:#aaa;font-size:12px;">-</span>
+                                <span style="color:#aaa;font-size:12px;">
+                                    —
+                                </span>
                             <?php endif; ?>
                         </td>
+
+                        <!-- Actions Column -->
                         <td>
                             <?php if($row['status'] == 'pending'): ?>
-                            <a href="cancel_appointment.php?id=<?php echo $row['id']; ?>"
-                               onclick="return confirm('Cancel this appointment?')"
-                               style="background:#dc3545;color:white;border:none;
-                                      border-radius:8px;padding:6px 12px;
-                                      font-size:12px;font-weight:600;
-                                      text-decoration:none;display:inline-block;">
-                                Cancel
-                            </a>
+                                <a href="cancel_appointment.php?id=<?php echo $row['id']; ?>"
+                                   onclick="return confirm('Cancel this appointment?')"
+                                   class="action-btn"
+                                   style="background:#dc3545;color:white;">
+                                    ❌ Cancel
+                                </a>
+
+                            <?php elseif($row['status'] == 'completed'): ?>
+                                <?php if(!$rated): ?>
+                                    <a href="rate_doctor.php?id=<?php echo $row['id']; ?>"
+                                       class="action-btn"
+                                       style="background:#ffc107;color:#333;">
+                                        ⭐ Rate Doctor
+                                    </a>
+                                <?php else: ?>
+                                    <span style="background:#fff3cd;
+                                                 color:#856404;padding:6px 12px;
+                                                 border-radius:8px;font-size:12px;
+                                                 font-weight:600;">
+                                        ⭐ Rated
+                                    </span>
+                                <?php endif; ?>
+
                             <?php else: ?>
-                            <span class="text-muted">-</span>
+                                <span class="text-muted">—</span>
                             <?php endif; ?>
                         </td>
                     </tr>
