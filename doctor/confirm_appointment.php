@@ -30,6 +30,8 @@ mysqli_query($conn,
 $apt_date = date('d M Y', strtotime($apt['appointment_date']));
 $apt_time = date('h:i A', strtotime($apt['appointment_time']));
 
+$admin_email = ADMIN_NOTIFY_EMAIL;
+
 // Patient ko confirmation + payment email
 $subject = "Appointment Confirmed - MediCare";
 $message = "
@@ -134,6 +136,42 @@ $message = "
 
 sendEmail($apt['patient_email'], $apt['patient_name'],
     $subject, $message);
+
+// ── Admin ko confirmation notification ──
+$subject_a = "Appointment Confirmed by Doctor - MediCare";
+$message_a = "
+<h2 style='color:#28a745;'>Appointment Confirmed!</h2>
+<p>A doctor has confirmed an appointment.</p>
+
+<table style='width:100%;border-collapse:collapse;
+              background:#f8f9fa;border-radius:8px;'>
+    <tr style='background:#d1e7dd;'>
+        <td style='padding:12px;color:#666;width:40%;'>Appointment ID</td>
+        <td style='padding:12px;font-weight:600;'>#$id</td>
+    </tr>
+    <tr>
+        <td style='padding:12px;color:#666;'>Patient</td>
+        <td style='padding:12px;font-weight:600;'>" . $apt['patient_name'] . "</td>
+    </tr>
+    <tr style='background:#d1e7dd;'>
+        <td style='padding:12px;color:#666;'>Doctor</td>
+        <td style='padding:12px;font-weight:600;'>Dr. " . $apt['doctor_name'] . "</td>
+    </tr>
+    <tr>
+        <td style='padding:12px;color:#666;'>Date</td>
+        <td style='padding:12px;font-weight:600;'>$apt_date</td>
+    </tr>
+    <tr style='background:#d1e7dd;'>
+        <td style='padding:12px;color:#666;'>Time</td>
+        <td style='padding:12px;font-weight:600;'>$apt_time</td>
+    </tr>
+    <tr>
+        <td style='padding:12px;color:#666;'>Status</td>
+        <td style='padding:12px;font-weight:700;color:#28a745;'>CONFIRMED</td>
+    </tr>
+</table>";
+
+sendEmail($admin_email, 'Admin', $subject_a, $message_a);
 
 echo "<script>
         alert('Appointment Confirmed! Patient notified via email.');

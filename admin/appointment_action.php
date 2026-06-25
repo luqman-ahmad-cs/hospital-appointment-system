@@ -23,9 +23,20 @@ if ($action === 'complete') {
           window.location='manage_appointments.php';</script>";
 
 } elseif ($action === 'delete') {
+
+    // Pehle linked records delete karo (foreign key fix)
+    mysqli_query($conn,
+        "DELETE FROM payments WHERE appointment_id='$id'");
+    mysqli_query($conn,
+        "DELETE FROM ratings WHERE appointment_id='$id'");
+    mysqli_query($conn,
+        "DELETE FROM prescriptions WHERE appointment_id='$id'");
+
+    // Phir appointment delete karo
     mysqli_query($conn,
         "DELETE FROM appointments WHERE id='$id'");
-    echo "<script>alert('Appointment Deleted!');
+
+    echo "<script>alert('Appointment Deleted Successfully!');
           window.location='manage_appointments.php';</script>";
 }
 ?>

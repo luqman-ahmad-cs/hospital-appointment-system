@@ -24,6 +24,8 @@ if (!$doctor) {
     exit();
 }
 
+$admin_email = ADMIN_NOTIFY_EMAIL;
+
 if ($action === 'approve') {
 
     mysqli_query($conn,
@@ -74,6 +76,21 @@ if ($action === 'approve') {
 
     sendEmail($doctor['email'], $doctor['fullname'], $subject, $message);
 
+    // Admin ko bhi confirmation
+    $subject_adm = "Doctor Approved - MediCare";
+    $message_adm = "
+    <h2 style='color:#28a745;'>Doctor Approved</h2>
+    <p>You approved the following doctor:</p>
+    <table style='width:100%;border-collapse:collapse;background:#f8f9fa;'>
+        <tr><td style='padding:10px;color:#666;'>Name</td>
+            <td style='padding:10px;font-weight:600;'>" . $doctor['fullname'] . "</td></tr>
+        <tr><td style='padding:10px;color:#666;'>Email</td>
+            <td style='padding:10px;'>" . $doctor['email'] . "</td></tr>
+        <tr><td style='padding:10px;color:#666;'>Specialization</td>
+            <td style='padding:10px;'>" . $doctor['specialization'] . "</td></tr>
+    </table>";
+    sendEmail($admin_email, 'Admin', $subject_adm, $message_adm);
+
     echo "<script>alert('Doctor Approved! Email sent to: " .
          $doctor['email'] . "');
           window.location='manage_doctors.php';</script>";
@@ -96,6 +113,19 @@ if ($action === 'approve') {
     </div>";
 
     sendEmail($doctor['email'], $doctor['fullname'], $subject, $message);
+
+    // Admin ko bhi confirmation
+    $subject_adm = "Doctor Blocked - MediCare";
+    $message_adm = "
+    <h2 style='color:#dc3545;'>Doctor Blocked</h2>
+    <p>You blocked the following doctor:</p>
+    <table style='width:100%;border-collapse:collapse;background:#f8f9fa;'>
+        <tr><td style='padding:10px;color:#666;'>Name</td>
+            <td style='padding:10px;font-weight:600;'>" . $doctor['fullname'] . "</td></tr>
+        <tr><td style='padding:10px;color:#666;'>Email</td>
+            <td style='padding:10px;'>" . $doctor['email'] . "</td></tr>
+    </table>";
+    sendEmail($admin_email, 'Admin', $subject_adm, $message_adm);
 
     echo "<script>alert('Doctor Blocked! Email sent.');
           window.location='manage_doctors.php';</script>";
@@ -120,6 +150,19 @@ if ($action === 'approve') {
 
     sendEmail($doctor['email'], $doctor['fullname'], $subject, $message);
 
+    // Admin ko bhi confirmation
+    $subject_adm = "Doctor Unblocked - MediCare";
+    $message_adm = "
+    <h2 style='color:#28a745;'>Doctor Unblocked</h2>
+    <p>You unblocked the following doctor:</p>
+    <table style='width:100%;border-collapse:collapse;background:#f8f9fa;'>
+        <tr><td style='padding:10px;color:#666;'>Name</td>
+            <td style='padding:10px;font-weight:600;'>" . $doctor['fullname'] . "</td></tr>
+        <tr><td style='padding:10px;color:#666;'>Email</td>
+            <td style='padding:10px;'>" . $doctor['email'] . "</td></tr>
+    </table>";
+    sendEmail($admin_email, 'Admin', $subject_adm, $message_adm);
+
     echo "<script>alert('Doctor Unblocked! Email sent.');
           window.location='manage_doctors.php';</script>";
 
@@ -140,12 +183,31 @@ if ($action === 'approve') {
 
     sendEmail($doctor['email'], $doctor['fullname'], $subject, $message);
 
+    // Admin ko bhi confirmation (delete se pehle)
+    $subject_adm = "Doctor Rejected - MediCare";
+    $message_adm = "
+    <h2 style='color:#dc3545;'>Doctor Rejected</h2>
+    <p>You rejected and removed the following doctor application:</p>
+    <table style='width:100%;border-collapse:collapse;background:#f8f9fa;'>
+        <tr><td style='padding:10px;color:#666;'>Name</td>
+            <td style='padding:10px;font-weight:600;'>" . $doctor['fullname'] . "</td></tr>
+        <tr><td style='padding:10px;color:#666;'>Email</td>
+            <td style='padding:10px;'>" . $doctor['email'] . "</td></tr>
+    </table>";
+    sendEmail($admin_email, 'Admin', $subject_adm, $message_adm);
+
     // Pehle appointments delete karo
     $apts = mysqli_query($conn,
         "SELECT id FROM appointments WHERE doctor_id='$id'");
     while ($apt = mysqli_fetch_assoc($apts)) {
         mysqli_query($conn,
             "DELETE FROM payments
+             WHERE appointment_id='" . $apt['id'] . "'");
+        mysqli_query($conn,
+            "DELETE FROM ratings
+             WHERE appointment_id='" . $apt['id'] . "'");
+        mysqli_query($conn,
+            "DELETE FROM prescriptions
              WHERE appointment_id='" . $apt['id'] . "'");
     }
     mysqli_query($conn,
@@ -174,12 +236,31 @@ if ($action === 'approve') {
 
     sendEmail($doctor['email'], $doctor['fullname'], $subject, $message);
 
+    // Admin ko bhi confirmation
+    $subject_adm = "Doctor Deleted - MediCare";
+    $message_adm = "
+    <h2 style='color:#dc3545;'>Doctor Deleted</h2>
+    <p>You deleted the following doctor account:</p>
+    <table style='width:100%;border-collapse:collapse;background:#f8f9fa;'>
+        <tr><td style='padding:10px;color:#666;'>Name</td>
+            <td style='padding:10px;font-weight:600;'>" . $doctor['fullname'] . "</td></tr>
+        <tr><td style='padding:10px;color:#666;'>Email</td>
+            <td style='padding:10px;'>" . $doctor['email'] . "</td></tr>
+    </table>";
+    sendEmail($admin_email, 'Admin', $subject_adm, $message_adm);
+
     // Pehle payments delete karo phir appointments phir doctor phir user
     $apts = mysqli_query($conn,
         "SELECT id FROM appointments WHERE doctor_id='$id'");
     while ($apt = mysqli_fetch_assoc($apts)) {
         mysqli_query($conn,
             "DELETE FROM payments
+             WHERE appointment_id='" . $apt['id'] . "'");
+        mysqli_query($conn,
+            "DELETE FROM ratings
+             WHERE appointment_id='" . $apt['id'] . "'");
+        mysqli_query($conn,
+            "DELETE FROM prescriptions
              WHERE appointment_id='" . $apt['id'] . "'");
     }
     mysqli_query($conn,

@@ -6,6 +6,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 function sendEmail($to_email, $to_name, $subject, $message) {
     $mail = new PHPMailer(true);
+    $log_file = __DIR__ . '/email_log.txt';
+
     try {
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
@@ -16,7 +18,9 @@ function sendEmail($to_email, $to_name, $subject, $message) {
         $mail->Port       = 587;
 
         $mail->setFrom('luqman.ahmad.cs@gmail.com', 'MediCare Hospital');
+        $mail->addReplyTo('luqman.ahmad.cs@gmail.com', 'MediCare Hospital');
         $mail->addAddress($to_email, $to_name);
+        $mail->XMailer = ' ';
 
         $mail->isHTML(true);
         $mail->Subject = $subject;
@@ -38,8 +42,19 @@ function sendEmail($to_email, $to_name, $subject, $message) {
         </div>";
 
         $mail->send();
+
+        // Success log
+        $log_entry = date('Y-m-d H:i:s') . " | SUCCESS | To: $to_email | Subject: $subject\n";
+        file_put_contents($log_file, $log_entry, FILE_APPEND);
+
         return true;
+
     } catch (Exception $e) {
+
+        // Error log — actual wajah yahan dikhegi
+        $log_entry = date('Y-m-d H:i:s') . " | FAILED | To: $to_email | Subject: $subject | Error: " . $mail->ErrorInfo . "\n";
+        file_put_contents($log_file, $log_entry, FILE_APPEND);
+
         return false;
     }
 }

@@ -106,63 +106,59 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             sendEmail($email, $fullname,
                 $subject_doc, $message_doc);
 
-            // Admin ko email
-            $admin_info = mysqli_fetch_assoc(mysqli_query($conn,
-                "SELECT email, fullname FROM users
-                 WHERE role='admin' LIMIT 1"));
+            // Admin ko email (fixed: hamesha ADMIN_NOTIFY_EMAIL pe jayega)
+            $admin_email = ADMIN_NOTIFY_EMAIL;
+            $admin_name  = 'Admin';
 
-            if ($admin_info) {
-                $subject_adm = "New Doctor Registration - MediCare";
-                $message_adm = "
-                <h2 style='color:#0d6efd;'>
-                    New Doctor Registration!
-                </h2>
-                <p>A new doctor has registered.
-                   Please review and approve.</p>
-                <table style='width:100%;border-collapse:collapse;
-                              background:#f8f9fa;'>
-                    <tr>
-                        <td style='padding:10px;color:#666;'>Name</td>
-                        <td style='padding:10px;font-weight:600;'>
-                            $fullname
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style='padding:10px;color:#666;'>Email</td>
-                        <td style='padding:10px;'>$email</td>
-                    </tr>
-                    <tr>
-                        <td style='padding:10px;color:#666;'>
-                            Specialization
-                        </td>
-                        <td style='padding:10px;'>$spec</td>
-                    </tr>
-                    <tr>
-                        <td style='padding:10px;color:#666;'>
-                            Qualification
-                        </td>
-                        <td style='padding:10px;'>$qual</td>
-                    </tr>
-                    <tr>
-                        <td style='padding:10px;color:#666;'>
-                            Experience
-                        </td>
-                        <td style='padding:10px;'>$exp years</td>
-                    </tr>
-                </table>
-                <br>
-                <a href='http://localhost:8080/hospital_project/admin/manage_doctors.php'
-                   style='display:block;background:#0d6efd;color:white;
-                          padding:14px;border-radius:8px;
-                          text-decoration:none;font-weight:bold;
-                          text-align:center;'>
-                    Review Doctor Application
-                </a>";
+            $subject_adm = "New Doctor Registration - MediCare";
+            $message_adm = "
+            <h2 style='color:#0d6efd;'>
+                New Doctor Registration!
+            </h2>
+            <p>A new doctor has registered.
+               Please review and approve.</p>
+            <table style='width:100%;border-collapse:collapse;
+                          background:#f8f9fa;'>
+                <tr>
+                    <td style='padding:10px;color:#666;'>Name</td>
+                    <td style='padding:10px;font-weight:600;'>
+                        $fullname
+                    </td>
+                </tr>
+                <tr>
+                    <td style='padding:10px;color:#666;'>Email</td>
+                    <td style='padding:10px;'>$email</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px;color:#666;'>
+                        Specialization
+                    </td>
+                    <td style='padding:10px;'>$spec</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px;color:#666;'>
+                        Qualification
+                    </td>
+                    <td style='padding:10px;'>$qual</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px;color:#666;'>
+                        Experience
+                    </td>
+                    <td style='padding:10px;'>$exp years</td>
+                </tr>
+            </table>
+            <br>
+            <a href='http://localhost:8080/hospital_project/admin/manage_doctors.php'
+               style='display:block;background:#0d6efd;color:white;
+                      padding:14px;border-radius:8px;
+                      text-decoration:none;font-weight:bold;
+                      text-align:center;'>
+                Review Doctor Application
+            </a>";
 
-                sendEmail($admin_info['email'],
-                    $admin_info['fullname'],
-                    $subject_adm, $message_adm);
-            }
+            sendEmail($admin_email, $admin_name,
+                $subject_adm, $message_adm);
 
             echo "<script>
                     alert('Doctor registration submitted! Wait for admin approval.');
@@ -209,6 +205,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </a>";
 
             sendEmail($email, $fullname, $subject, $message);
+
+            // Admin ko bhi notify karo ke naya patient register hua
+            $admin_email = ADMIN_NOTIFY_EMAIL;
+            $admin_name  = 'Admin';
+
+            $subject_p_adm = "New Patient Registration - MediCare";
+            $message_p_adm = "
+            <h2 style='color:#0d6efd;'>New Patient Registered!</h2>
+            <table style='width:100%;border-collapse:collapse;background:#f8f9fa;'>
+                <tr>
+                    <td style='padding:10px;color:#666;'>Name</td>
+                    <td style='padding:10px;font-weight:600;'>$fullname</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px;color:#666;'>Email</td>
+                    <td style='padding:10px;'>$email</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px;color:#666;'>Phone</td>
+                    <td style='padding:10px;'>$phone</td>
+                </tr>
+            </table>";
+
+            sendEmail($admin_email, $admin_name, $subject_p_adm, $message_p_adm);
 
             echo "<script>
                     alert('Registration successful! Please login.');

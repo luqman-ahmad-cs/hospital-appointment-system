@@ -39,10 +39,9 @@ if (mysqli_query($conn, $sql)) {
          JOIN doctors d  ON a.doctor_id = d.user_id
          WHERE a.id = '$appointment_id'"));
 
-    // Admin info fetch
-    $admin = mysqli_fetch_assoc(mysqli_query($conn,
-        "SELECT email, fullname FROM users
-         WHERE role='admin' LIMIT 1"));
+    // Admin notification email (fixed: ab ADMIN_NOTIFY_EMAIL use hoga)
+    $admin_email = ADMIN_NOTIFY_EMAIL;
+    $admin_name  = 'Admin';
 
     $apt_date  = date('d M Y', strtotime($apt['appointment_date']));
     $apt_time  = date('h:i A', strtotime($apt['appointment_time']));
@@ -214,7 +213,7 @@ if (mysqli_query($conn, $sql)) {
         <p style='margin:5px 0 0;'>HBL Bank: 1234-5678-9012 (Luqman Ahmad)</p>
     </div>";
 
-    sendEmail($admin['email'], $admin['fullname'], $subject_a, $message_a);
+    sendEmail($admin_email, $admin_name, $subject_a, $message_a);
 
     // Receipt page pe bhejo
     header("Location: payment_receipt.php?txn=$transaction_id&apt=$appointment_id");

@@ -21,6 +21,8 @@ if (!$patient) {
     exit();
 }
 
+$admin_email = ADMIN_NOTIFY_EMAIL;
+
 if ($action === 'block') {
 
     mysqli_query($conn,
@@ -39,6 +41,19 @@ if ($action === 'block') {
     </div>";
 
     sendEmail($patient['email'], $patient['fullname'], $subject, $message);
+
+    // Admin ko bhi confirmation
+    $subject_adm = "Patient Blocked - MediCare";
+    $message_adm = "
+    <h2 style='color:#dc3545;'>Patient Blocked</h2>
+    <p>You blocked the following patient:</p>
+    <table style='width:100%;border-collapse:collapse;background:#f8f9fa;'>
+        <tr><td style='padding:10px;color:#666;'>Name</td>
+            <td style='padding:10px;font-weight:600;'>" . $patient['fullname'] . "</td></tr>
+        <tr><td style='padding:10px;color:#666;'>Email</td>
+            <td style='padding:10px;'>" . $patient['email'] . "</td></tr>
+    </table>";
+    sendEmail($admin_email, 'Admin', $subject_adm, $message_adm);
 
     echo "<script>alert('Patient Blocked! Email sent.');
           window.location='manage_patients.php';</script>";
@@ -63,6 +78,19 @@ if ($action === 'block') {
 
     sendEmail($patient['email'], $patient['fullname'], $subject, $message);
 
+    // Admin ko bhi confirmation
+    $subject_adm = "Patient Unblocked - MediCare";
+    $message_adm = "
+    <h2 style='color:#28a745;'>Patient Unblocked</h2>
+    <p>You unblocked the following patient:</p>
+    <table style='width:100%;border-collapse:collapse;background:#f8f9fa;'>
+        <tr><td style='padding:10px;color:#666;'>Name</td>
+            <td style='padding:10px;font-weight:600;'>" . $patient['fullname'] . "</td></tr>
+        <tr><td style='padding:10px;color:#666;'>Email</td>
+            <td style='padding:10px;'>" . $patient['email'] . "</td></tr>
+    </table>";
+    sendEmail($admin_email, 'Admin', $subject_adm, $message_adm);
+
     echo "<script>alert('Patient Unblocked! Email sent.');
           window.location='manage_patients.php';</script>";
 
@@ -82,8 +110,20 @@ if ($action === 'block') {
 
     sendEmail($patient['email'], $patient['fullname'], $subject, $message);
 
-    // Sahi order mein delete karo
-    // 1. Pehle payments delete karo
+    // Admin ko bhi confirmation
+    $subject_adm = "Patient Deleted - MediCare";
+    $message_adm = "
+    <h2 style='color:#dc3545;'>Patient Deleted</h2>
+    <p>You deleted the following patient account:</p>
+    <table style='width:100%;border-collapse:collapse;background:#f8f9fa;'>
+        <tr><td style='padding:10px;color:#666;'>Name</td>
+            <td style='padding:10px;font-weight:600;'>" . $patient['fullname'] . "</td></tr>
+        <tr><td style='padding:10px;color:#666;'>Email</td>
+            <td style='padding:10px;'>" . $patient['email'] . "</td></tr>
+    </table>";
+    sendEmail($admin_email, 'Admin', $subject_adm, $message_adm);
+
+    // Sahi order mein delete karo (foreign key safe)
     $apts = mysqli_query($conn,
         "SELECT id FROM appointments
          WHERE patient_id='$id'");
@@ -91,13 +131,17 @@ if ($action === 'block') {
         mysqli_query($conn,
             "DELETE FROM payments
              WHERE appointment_id='" . $apt['id'] . "'");
+        mysqli_query($conn,
+            "DELETE FROM ratings
+             WHERE appointment_id='" . $apt['id'] . "'");
+        mysqli_query($conn,
+            "DELETE FROM prescriptions
+             WHERE appointment_id='" . $apt['id'] . "'");
     }
 
-    // 2. Appointments delete karo
     mysqli_query($conn,
         "DELETE FROM appointments WHERE patient_id='$id'");
 
-    // 3. User delete karo
     mysqli_query($conn,
         "DELETE FROM users WHERE id='$id'");
 

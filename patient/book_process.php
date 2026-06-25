@@ -43,6 +43,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (mysqli_query($conn, $sql)) {
 
+        $new_appointment_id = mysqli_insert_id($conn);
+
         // Doctor info fetch
         $doctor = mysqli_fetch_assoc(mysqli_query($conn,
             "SELECT fullname, email
@@ -52,6 +54,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $patient_email = $_SESSION['user_email'];
         $apt_date = date('d M Y', strtotime($appointment_date));
         $apt_time = date('h:i A', strtotime($appointment_time));
+
+        $admin_email = ADMIN_NOTIFY_EMAIL;
 
         // ── Patient ko email ──
         $subject_p = "Appointment Booked - MediCare";
@@ -213,6 +217,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         sendEmail($doctor['email'], $doctor['fullname'],
             $subject_d, $message_d);
+
+        // ── Admin ko email ──
+        $subject_a = "New Appointment Booked - MediCare";
+        $message_a = "
+        <h2 style='color:#0d6efd;'>New Appointment Booked!</h2>
+        <p>A patient has booked a new appointment.</p>
+
+        <table style='width:100%;border-collapse:collapse;
+                      background:#f8f9fa;border-radius:8px;'>
+            <tr>
+                <td style='padding:10px;color:#666;width:40%;'>Appointment ID</td>
+                <td style='padding:10px;font-weight:600;'>#$new_appointment_id</td>
+            </tr>
+            <tr style='background:#e8f0fe;'>
+                <td style='padding:10px;color:#666;'>Patient</td>
+                <td style='padding:10px;font-weight:600;'>$patient_name</td>
+            </tr>
+            <tr>
+                <td style='padding:10px;color:#666;'>Doctor</td>
+                <td style='padding:10px;font-weight:600;'>Dr. " . $doctor['fullname'] . "</td>
+            </tr>
+            <tr style='background:#e8f0fe;'>
+                <td style='padding:10px;color:#666;'>Date</td>
+                <td style='padding:10px;font-weight:600;'>$apt_date</td>
+            </tr>
+            <tr>
+                <td style='padding:10px;color:#666;'>Time</td>
+                <td style='padding:10px;font-weight:600;'>$apt_time</td>
+            </tr>
+            <tr style='background:#e8f0fe;'>
+                <td style='padding:10px;color:#666;'>Type</td>
+                <td style='padding:10px;'>$type</td>
+            </tr>
+            <tr style='background:#fff3cd;'>
+                <td style='padding:10px;color:#666;'>Status</td>
+                <td style='padding:10px;font-weight:700;color:#856404;'>Pending Doctor Confirmation</td>
+            </tr>
+        </table>";
+
+        sendEmail($admin_email, 'Admin', $subject_a, $message_a);
 
         echo "<script>
                 alert('Appointment Booked! Check email for payment instructions.');
